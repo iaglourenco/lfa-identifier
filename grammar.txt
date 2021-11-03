@@ -1,0 +1,10 @@
+G((START,BODY,DECL_VAR,SYM,OPERATION,VAR,NUM),(printf,scanf,;,+,-,*,/,0...9,a...z,),START,BODY)
+
+
+START-> main(){ BODY }
+BODY-> int DECL_VAR; | scanf(VAR); | printf(VAR); | VAR = NUM; | VAR = OPERATION;
+SYM-> + | - | * | /
+OPERATION-> VAR SYM VAR | NUM SYM NUM | VAR SYM NUM | NUM SYM VAR 
+VAR-> a...zVAR | a...z (excluindo palavras reservadas)
+DECL_VAR-> VAR | VAR,DECL_VAR
+NUM-> 0...9NUM | OPERATION | 0...9
