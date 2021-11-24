@@ -4,7 +4,7 @@
 # - Iago Lourenço - @iaglourenco
 
 import sys
-
+import re
 reserved_words = [
     'main()',
     ';',
@@ -50,6 +50,8 @@ def valida_variavel(input: str):
         return False  # Se não for, retorna False
 
     for character in input:
+        if word+'(' in reserved_words and len(word) > 0:
+            return False  # Se o nome da variavel for uma palavra reservada, retorna False
 
         if character.isalpha():  # Se for letra
             word += character   # Adiciona o caracter ao nome da variavel
@@ -61,31 +63,37 @@ def valida_variavel(input: str):
             continue
 
         # Se for ponto e virgula termina a detecção e o ultimo caracter não foi virgula
-        if vars[-1] != ',' and character == ';':
+        if character == ';':
             vars += word+character  # Adiciona o nome da variavel a string de variaveis
-            # Substitui as variaveis reconhecidas da entrada
-            input = input.replace(vars+character, '')
-            # Adiciona as variaveis ao vetor de variaveis
-            declared_vars.append(vars.replace(";", "").split(','))
-            return True
+            if vars[-2] != ',':
+                # Substitui as variaveis reconhecidas da entrada
+                input = input.replace(vars+character, '')
+                # Adiciona as variaveis ao vetor de variaveis
+                declared_vars.extend(vars.replace(";", "").split(','))
+
+                return vars
 
         else:
             return False  # Se não, retorna False
 
 
 def valida_variavel_declarada(input: str):
-    # Função para validar se as variaveis do scanf, printf e operações foram declaradas anteriormente
-    var = ''
-    for character in input:
-        var += character
-        if var in declared_vars:
-            return True
+    # Função para validar se as variaveis do scanf, printf  foram declaradas anteriormente
+    if input in declared_vars:
+        return input
+    else:
+        return False
 
 
-def valida_operacao(input: str):
-    # Função que valida equações aka. (s=a+b
+def valida_variavel_declarada_e_numero(input: str):
+    # Função para validar se as variaveis foram declaradas anteriormente ignorando numeros
 
-    return True
+    for var in input.split(','):
+        if var.strip() in declared_vars or var.strip().isdigit():
+            continue
+        else:
+            return False
+    return input
 
 
 def deuruim(onde: str):
@@ -103,72 +111,121 @@ if __name__ == '__main__':
 
     print(input)
     input = input.replace("\n", "").replace("\t", "").strip()
+    # Valida "main()"
+    simbolo = monta_simbolo(input).strip()
+    if simbolo != "main()":
+        deuruim("main")
+    input = input.replace(simbolo, '', 1).strip()
+    # ----------------------------------------------------
+    # Valida "{"
+    simbolo = monta_simbolo(input)
+    if simbolo != '{':
+        deuruim("{")
+    input = input.replace(simbolo, '', 1).strip()
+
     while len(input):
-        # Valida "main()"
-        simbolo = monta_simbolo(input).strip()
-        if simbolo != "main()":
-            deuruim("main")
-        input = input.replace(simbolo, "").strip()
-        # ----------------------------------------------------
-        # Valida "{"
-        simbolo = monta_simbolo(input)
-        if simbolo != '{':
-            deuruim("{")
-        input = input.replace(simbolo, '').strip()
-        # ----------------------------------------------------
-        # Valida <decl vars>
-        simbolo = monta_simbolo(input)
-        if simbolo != 'int ':
-            deuruim("decl vars")
-        input = input.replace(simbolo, '').strip()
-        # ----------------------------------------------------
-        # Valida <nome_variaveis>
-        if not valida_variavel(input):
-            deuruim("name vars")
-        input = input.replace(simbolo, '').strip()
-        # ----------------------------------------------------
-        # Valida <scanf>
-        simbolo = monta_simbolo(input)
-        if simbolo != 'scanf(':
-            deuruim("scanf")
-        input = input.replace(simbolo, '').strip()
-        # Chama função valida variavel
 
-        # Valida fechamento do scanf ")"
         simbolo = monta_simbolo(input)
-        if simbolo != ')':
-            deuruim(")")
-        input = input.replace(simbolo, '').strip()
-        # Valida fechamento do scanf ";"
-        simbolo = monta_simbolo(input)
-        if simbolo != ';':
-            deuruim(";")
-        input = input.replace(simbolo, '').strip()
-        # ----------------------------------------------------
-        # Valida <printf>
-        simbolo = monta_simbolo(input)
-        if simbolo != 'printf(':
-            deuruim("printf")
-        input = input.replace(simbolo, '').strip()
-        # Chama função valida variavel
-
-        # Valida fechamento do printf ")"
-        simbolo = monta_simbolo(input)
-        if simbolo != ')':
-            deuruim(")")
-        input = input.replace(simbolo, '').strip()
-        # Valida fechamento do printf ";"
-        simbolo = monta_simbolo(input)
-        if simbolo != ';':
-            deuruim(";")
-        input = input.replace(simbolo, '').strip()
-        # ----------------------------------------------------
-        # Valida <Operadores>
-
         # ----------------------------------------------------
         # Valida "}"
-        simbolo = monta_simbolo(input)
-        if simbolo != '}':
-            deuruim("}")
-        input = input.replace(simbolo, '').strip()
+        if simbolo == '}':
+            input = input.replace(simbolo, '', 1).strip()
+            if len(input) > 0:
+                deuruim("Algo fora do colchete")
+            else:
+                print("Aceita")
+                break
         # ----------------------------------------------------
+        # Valida <decl vars>
+        elif(simbolo == 'int '):
+            simbolo = monta_simbolo(input)
+            if simbolo != 'int ':
+                deuruim("decl vars")
+            input = input.replace(simbolo, '', 1).strip()
+            # Valida <nome_variaveis>
+            simbolo = valida_variavel(input)
+            if not simbolo:
+                deuruim("name vars")
+            input = input.replace(simbolo, '', 1).strip()
+        # ----------------------------------------------------
+        # Valida <scanf>
+        elif(simbolo == 'scanf('):
+            simbolo = monta_simbolo(input)
+            if simbolo != 'scanf(':
+                deuruim("scanf")
+            input = input.replace(simbolo, '', 1).strip()
+            # Chama função valida variavel
+            simbolo = valida_variavel_declarada(input.split(')', 1)[0])
+            if not simbolo:
+                deuruim("scanf var")
+            input = input.replace(simbolo, '', 1).strip()
+
+            # Valida fechamento do scanf ")"
+            simbolo = monta_simbolo(input)
+            if simbolo != ')':
+                deuruim(")")
+            input = input.replace(simbolo, '', 1).strip()
+            # Valida fechamento do scanf ";"
+            simbolo = monta_simbolo(input)
+            if simbolo != ';':
+                deuruim(";")
+            input = input.replace(simbolo, '', 1).strip()
+        # ----------------------------------------------------
+        # Valida <printf>
+        elif(simbolo == 'printf('):
+            simbolo = monta_simbolo(input)
+            if simbolo != 'printf(':
+                deuruim("printf")
+            input = input.replace(simbolo, '', 1).strip()
+            # Chama função valida variavel
+            simbolo = valida_variavel_declarada(input.split(')', 1)[0])
+            if not simbolo:
+                deuruim("printf var")
+            input = input.replace(simbolo, '', 1).strip()
+
+            # Valida fechamento do printf ")"
+            simbolo = monta_simbolo(input)
+            if simbolo != ')':
+                deuruim(")")
+            input = input.replace(simbolo, '', 1).strip()
+            # Valida fechamento do printf ";"
+            simbolo = monta_simbolo(input)
+            if simbolo != ';':
+                deuruim(";")
+            input = input.replace(simbolo, '', 1).strip()
+        # ----------------------------------------------------
+        # Valida <Operadores>
+        elif valida_variavel_declarada(input.split('=', 1)[0]):
+            variavel_operacao = valida_variavel_declarada(
+                input.split('=', 1)[0])
+            input = input.replace(variavel_operacao+'=', '', 1).strip()
+
+            # Substitui do input os caracteres '+', '-', '*', '/'
+            input = input.replace('+', ',').strip()
+            input = input.replace('-', ',').strip()
+            input = input.replace('*', ',').strip()
+            input = input.replace('/', ',').strip()
+            operacao_vars = valida_variavel_declarada_e_numero(
+                input.split(";", 1)[0])
+            if operacao_vars:
+                input = input.replace(input.split(";", 1)[0], '').strip()
+
+             # Valida fechamento da operacao ";"
+                simbolo = monta_simbolo(input)
+                if simbolo != ';':
+                    deuruim(";")
+                input = input.replace(simbolo, '', 1).strip()
+
+            else:
+                deuruim("Equacao var")
+
+            # media=soma/2;
+            # soma/valora;
+            # soma,2
+            # ["soma"  "2"]
+            # isAlpha -> validar variavel
+            # else numero
+
+        # ----------------------------------------------------
+        else:
+            deuruim("Instrução estranha")
