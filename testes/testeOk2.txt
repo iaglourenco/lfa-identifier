@@ -1,0 +1,7 @@
+main(){
+  int variavel;
+  scanf(variavel);
+  
+  printf(variavel);
+
+}

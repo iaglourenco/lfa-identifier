@@ -1,0 +1,9 @@
+main(){
+  int valora,valorb,soma,media;
+  scanf(erro);
+  scanf(valorb);
+  soma=valora+valorb;
+  printf(soma);
+  media=soma/2;
+  printf(media);
+}

@@ -1,0 +1,7 @@
+main(){
+  int valora,valorb,multiplicacao;
+  scanf(valora);
+  scanf(valorb);
+  multiplicacao=valora*valorb;
+  printf(multiplicacao);
+}
