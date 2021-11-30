@@ -64,6 +64,16 @@ main(){
 
 
 
+## Como utilizar
+
+- Voce vai precisar o interpretador Python 3 instalado em sua máquina;
+- Com ele devidamente instalado, basta executar o arquivo `main.py` com o CLI (terminal);
+- Ex. `python3 main.py <arquivo_de_entrada.txt>`
+
+- A gramática está definida em `grammar.txt`;
+- Há varios testes disponíveis em `/testes/`;  
+
+
 ## Autores
 
 - Bruno Camilo - [@BrunoSilverio](http://github.com/BrunoSilverio)
