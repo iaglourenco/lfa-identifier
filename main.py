@@ -110,7 +110,7 @@ def valida_variavel_declarada_e_numero(input: str):
 
 def erro(onde: str):
     print("Rejeitada", onde)
-    exit(-1)
+    sys.exit(-1)
 
 
 # Programa principal
@@ -118,7 +118,7 @@ if __name__ == "__main__":
     # Verifica se o número de argumentos é igual a 2
     if len(sys.argv) != 2:
         print("Usage: ./main.py <input>")
-        exit(1)
+        sys.exit(1)
 
     # Abre o arquivo de entrada
     with open(sys.argv[1], "r") as f:
@@ -220,7 +220,8 @@ if __name__ == "__main__":
         # ----------------------------------------------------
         # Valida <Atribuição>
         elif valida_variavel_declarada(input.split("=", 1)[0]):
-            variavel_operacao = valida_variavel_declarada(input.split("=", 1)[0])
+            variavel_operacao = valida_variavel_declarada(
+                input.split("=", 1)[0])
             input = input.replace(variavel_operacao + "=", "", 1).strip()
 
             # Substitui do input os caracteres '+', '-', '*', '/' por vírgula
@@ -229,7 +230,8 @@ if __name__ == "__main__":
             input = input.replace("-", ",").strip()
             input = input.replace("*", ",").strip()
             input = input.replace("/", ",").strip()
-            operacao_vars = valida_variavel_declarada_e_numero(input.split(";", 1)[0])
+            operacao_vars = valida_variavel_declarada_e_numero(
+                input.split(";", 1)[0])
             if operacao_vars:
                 input = input.replace(input.split(";", 1)[0], "").strip()
 
